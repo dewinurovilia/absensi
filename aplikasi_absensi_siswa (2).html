@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aplikasi Absensi Siswa</title>
+<style>
+:root{--navy:#183b56;--blue:#2878b5;--mint:#eaf6f4;--line:#dce5ec;--ink:#243746}
+*{box-sizing:border-box}body{margin:0;background:#f3f7fa;color:var(--ink);font:15px Arial,sans-serif}
+header{background:linear-gradient(120deg,#183b56,#2878b5);color:white;padding:25px 18px}
+header h1{margin:0 0 7px;font-size:25px}header p{margin:0;opacity:.9}
+main{max-width:1100px;margin:22px auto;padding:0 14px}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 4px 16px #173b5610}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.field{display:flex;flex-direction:column;gap:6px;min-width:150px;flex:1}
+label{font-size:13px;font-weight:bold;color:#4a6172}input,select,button{font:inherit;border-radius:8px;padding:10px;border:1px solid #cbd8e2}input:focus,select:focus{outline:2px solid #b9ddf5}
+button{background:var(--blue);color:white;border:0;font-weight:bold;cursor:pointer}button.secondary{background:#eaf1f6;color:var(--navy);border:1px solid var(--line)}button.danger{background:#a63b3b}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.hint{color:#617687;font-size:13px;line-height:1.5}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:14px}.stat{background:#f4f8fb;padding:12px;border-radius:10px;text-align:center}.stat b{display:block;font-size:22px;color:var(--navy)}.stat span{font-size:12px;color:#60788a}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f3f7fa;color:#496174;font-size:13px}td select{width:100%;min-width:115px;padding:8px}.num{width:44px;color:#708394}.empty{text-align:center;color:#718596;padding:25px}
+footer{text-align:center;color:#718596;font-size:12px;padding:14px}
+@media(max-width:650px){.summary{grid-template-columns:repeat(2,1fr)}header h1{font-size:21px}.panel{padding:13px}}
+</style>
+</head>
+<body>
+<header><h1>📋 Aplikasi Absensi Siswa</h1><p>Catat kehadiran harian dan unduh rekap bulanan dalam format CSV yang dapat dibuka di Excel.</p></header>
+<main>
+<section class="panel">
+ <div class="controls">
+  <div class="field"><label for="school">Nama Sekolah</label><input id="school" placeholder="SD Negeri ..."></div>
+  <div class="field"><label for="className">Kelas</label><input id="className" placeholder="Contoh: V"></div>
+  <div class="field"><label for="date">Tanggal Absensi</label><input id="date" type="date"></div>
+ </div>
+ <div class="actions"><button id="saveMeta">Simpan Identitas Kelas</button></div>
+ <p class="hint">Masukkan nama siswa satu per baris. Setelah ditambahkan, pilih status kehadiran pada tanggal yang dipilih. Data tersimpan di browser/perangkat ini.</p>
+ <div class="field"><label for="names">Daftar Nama Siswa</label><textarea id="names" rows="4" style="font:inherit;padding:10px;border:1px solid #cbd8e2;border-radius:8px" placeholder="Nama siswa 1&#10;Nama siswa 2&#10;Nama siswa 3"></textarea></div>
+ <div class="actions"><button id="addStudents">Tambahkan Nama Siswa</button><button class="secondary" id="clearStudents">Hapus Daftar Siswa</button></div>
+</section>
+<section class="panel">
+ <div class="controls">
+  <div class="field"><label for="month">Bulan Rekap</label><input id="month" type="month"></div>
+  <div class="field"><label for="filter">Tampilkan</label><select id="filter"><option value="all">Semua siswa</option><option value="unfilled">Belum diisi hari ini</option></select></div>
+ </div>
+ <div class="summary" id="summary"></div>
+ <div class="actions"><button id="download">⬇ Unduh Rekap Bulanan (CSV/Excel)</button><button class="secondary" id="print">Cetak Absensi Hari Ini</button></div>
+ <p class="hint">Keterangan: H = Hadir, I = Izin, S = Sakit, A = Alpa. Rekap bulanan berisi jumlah tiap status dan rincian status per tanggal.</p>
+</section>
+<section class="panel">
+ <h3 id="listTitle">Daftar Kehadiran</h3>
+ <div class="table-wrap"><table><thead><tr><th>No.</th><th>Nama Siswa</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table></div>
+</section>
+</main>
+<section class="panel">
+ <h3>Input Nilai Siswa</h3>
+ <p class="hint">Pilih nama siswa dari daftar, masukkan mata pelajaran, jenis penilaian, dan nilai. Nilai tersimpan pada perangkat ini dan ikut masuk rekap bulanan.</p>
+ <div class="controls">
+  <div class="field"><label for="gradeDate">Tanggal Penilaian</label><input id="gradeDate" type="date"></div>
+  <div class="field"><label for="gradeStudent">Nama Siswa</label><select id="gradeStudent"></select></div>
+  <div class="field"><label for="subject">Mata Pelajaran</label><input id="subject" placeholder="Contoh: Matematika"></div>
+  <div class="field"><label for="assessment">Jenis Penilaian</label><input id="assessment" placeholder="Contoh: Latihan Bab 1"></div>
+  <div class="field"><label for="score">Nilai (0–100)</label><input id="score" type="number" min="0" max="100" placeholder="Nilai"></div>
+ </div>
+ <div class="actions"><button id="saveGrade">Simpan Nilai</button><button class="secondary" id="downloadGrades">Unduh Rekap Nilai Bulanan</button></div>
+ <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Tanggal</th><th>Nama Siswa</th><th>Mapel</th><th>Penilaian</th><th>Nilai</th></tr></thead><tbody id="gradeBody"></tbody></table></div>
+</section>
+<footer>Absensi tersimpan secara lokal pada browser yang digunakan. Ekspor CSV secara berkala sebagai cadangan.</footer>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='absensi_siswa_app_v1';
+let db={school:'',className:'',students:["AHMAD DIMAS ALFIANSYAH", "AISYAH AYUDIA INARA", "AMIRA BILQIS SURYANI", "ARDARA FREDILLA ULANI", "FEDRIN SATRIA RAJADA", "FITA INDRIYANI", "MOHAMAD APRILEO PRATAMA", "MUHAMMAD ONY FEBRIANTO", "NATASYA ARSYINTA DWI NUR SAQILA", "RAYA FRISKA AZZAHRA PUTRI", "RIZKI PUTRA PRATAMA", "ROBI"AH WIDYA ASANTI"],records:{},grades:{}};
+try{db={...db,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){}
+if(!Array.isArray(db.students)||db.students.length===0) db.students=["AHMAD DIMAS ALFIANSYAH", "AISYAH AYUDIA INARA", "AMIRA BILQIS SURYANI", "ARDARA FREDILLA ULANI", "FEDRIN SATRIA RAJADA", "FITA INDRIYANI", "MOHAMAD APRILEO PRATAMA", "MUHAMMAD ONY FEBRIANTO", "NATASYA ARSYINTA DWI NUR SAQILA", "RAYA FRISKA AZZAHRA PUTRI", "RIZKI PUTRA PRATAMA", "ROBI"AH WIDYA ASANTI"]; db.grades ||= {};\nconst today=new Date(), iso=d=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)};
+$('date').value=iso(today);$('month').value=iso(today).slice(0,7);
+$('school').value=db.school;$('className').value=db.className;
+function persist(){localStorage.setItem(KEY,JSON.stringify(db))}
+function rec(date){db.records[date] ||= {};return db.records[date]}
+function statusLabel(s){return ({H:'Hadir',I:'Izin',S:'Sakit',A:'Alpa'})[s]||'—'}
+function render(){
+ const date=$('date').value, entries=rec(date), filter=$('filter').value;
+ $('listTitle').textContent=`Kehadiran ${date||''}`;
+ const visible=db.students.filter(n=>filter==='all'||!entries[n]);
+ $('tbody').innerHTML=visible.length?visible.map((n,i)=>`<tr><td class="num">${i+1}</td><td><select aria-label="Pilih nama siswa" class="studentPick" data-current="${encodeURIComponent(n)}"><option value="">Pilih nama siswa</option>${db.students.map(st=>`<option value="${escapeHtml(st)}" ${st===n?'selected':''}>${escapeHtml(st)}</option>`).join('')}</select></td><td><select aria-label="Status ${escapeHtml(n)}" data-name="${encodeURIComponent(n)}"><option value="">Pilih status</option>${[['H','Hadir'],['I','Izin'],['S','Sakit'],['A','Alpa']].map(([v,l])=>`<option value="${v}" ${entries[n]===v?'selected':''}>${l}</option>`).join('')}</select></td></tr>`).join(''):`<tr><td colspan="3" class="empty">Belum ada nama siswa atau semua data sudah diisi.</td></tr>`;
+ $('tbody').querySelectorAll('.studentPick').forEach(sel=>sel.addEventListener('change',()=>{const prior=decodeURIComponent(sel.dataset.current),chosen=sel.value;if(!chosen)return;if(chosen!==prior && entries[prior]){entries[chosen]=entries[prior];delete entries[prior]}persist();render()}));
+ $('tbody').querySelectorAll('select[data-name]').forEach(sel=>sel.addEventListener('change',()=>{const n=decodeURIComponent(sel.dataset.name);if(sel.value)entries[n]=sel.value;else delete entries[n];persist();renderSummary()}));
+ renderSummary();
+}
+function renderSummary(){
+ const entries=rec($('date').value), counts={H:0,I:0,S:0,A:0}, filled=Object.keys(entries).length;
+ Object.values(entries).forEach(s=>{if(counts[s]!==undefined)counts[s]++});
+ $('summary').innerHTML=[['Jumlah Siswa',db.students.length],['Hadir',counts.H],['Izin',counts.I],['Sakit',counts.S],['Alpa',counts.A]].map(([l,v])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('saveMeta').onclick=()=>{db.school=$('school').value.trim();db.className=$('className').value.trim();persist();alert('Identitas kelas disimpan.');};
+$('addStudents').onclick=()=>{const incoming=$('names').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);let added=0;incoming.forEach(n=>{if(!db.students.includes(n)){db.students.push(n);added++}});$('names').value='';persist();render();alert(`${added} siswa ditambahkan.`)};
+$('clearStudents').onclick=()=>{if(confirm('Hapus seluruh daftar siswa? Catatan absensi lama tetap tersimpan.')){db.students=[];persist();render()}};
+$('date').onchange=render;$('filter').onchange=render;
+$('download').onclick=()=>{
+ const month=$('month').value;if(!month){alert('Pilih bulan rekap.');return}
+ const days=Object.keys(db.records).filter(d=>d.startsWith(month)).sort();
+ const headers=['No','Nama Siswa','Hadir','Izin','Sakit','Alpa',...days];
+ const rows=db.students.map((n,i)=>{const c={H:0,I:0,S:0,A:0};days.forEach(d=>{const s=db.records[d]?.[n];if(c[s]!==undefined)c[s]++});return [i+1,n,c.H,c.I,c.S,c.A,...days.map(d=>db.records[d]?.[n]||'')]});
+ const csv=[['Sekolah',db.school],['Kelas',db.className],['Bulan',month],[],headers,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=`Rekap_Absensi_${(db.className||'Kelas').replace(/\s+/g,'_')}_${month}.csv`;a.click();URL.revokeObjectURL(url);
+};
+$('print').onclick=()=>window.print();
+render();
+</script>
+</body></html>
