@@ -30,12 +30,13 @@ nav button.on{color:var(--pr);font-weight:700}nav i{display:block;font-style:nor
 .sheet>div{background:var(--card);width:100%;max-width:520px;border-radius:24px 24px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px))}
 .big{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:16px;font-weight:700;color:#fff;margin-top:10px;cursor:pointer}
 .ghost{background:none;color:var(--mu);font-weight:500}
-select,input[type=number]{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+select,input[type=number],input[type=date],input[type=month]{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
 .row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
 .row .n{font-size:13px;font-weight:600;flex:1}input[type=number]{width:78px;text-align:center}
 .wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--bd)}td:first-child,th:first-child{text-align:left}
 .note{font-size:12px;color:var(--mu);background:var(--card);border:1px dashed var(--bd);border-radius:12px;padding:8px 12px;margin-bottom:12px}
 #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#222;color:#fff;padding:9px 16px;border-radius:99px;font-size:13px;display:none;z-index:20}
+.seg{flex:1;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;padding:9px;font:inherit;font-size:13px;cursor:pointer}.seg.on{background:var(--pr);color:#fff;border-color:var(--pr);font-weight:700}
 h3{margin:0 0 10px;font-size:15px}.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden;margin-top:12px}.bar div{height:100%;background:linear-gradient(90deg,var(--ok),#4ade80)}
 </style>
 </head>
@@ -50,7 +51,7 @@ const MP=[["MTK","Matematika"],["BIN","Bahasa Indonesia"],["BING","Bahasa Inggri
 const JT=["Harian","UTS","UAS"];
 const $=s=>document.querySelector(s);
 const today=new Date().toLocaleDateString('sv-SE');
-let db=null,canG=false,mode='wait',tab='absen',sel=null,mp="MTK",jt="Harian",A={},V={};
+let db=null,canG=false,mode='wait',tab='absen',sel=null,mp="MTK",jt="Harian",A={},V={},D={},fb=null,per={t:'harian',v:today};
 $('#tgl').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2200)}
 function saveLocal(){try{localStorage.setItem('absn',JSON.stringify({A,V}))}catch(e){}}
@@ -69,12 +70,15 @@ function setAbsen(i,st){
   else{const r={i,date:today,status:st,time:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})};A[k]=r;if(db)db.collection('absen').doc(k).set(r).catch(()=>toast('Gagal menyimpan'))}
   saveLocal();render();
 }
-function setNilai(i,val){
-  const k=[mp,jt,i].join('_');
-  if(val===''){delete V[k];if(db)db.collection('nilai').doc(k).delete().catch(()=>{})}
-  else{const r={mp,jt,i,v:Math.max(0,Math.min(100,+val))};V[k]=r;if(db)db.collection('nilai').doc(k).set(r).catch(()=>toast('Gagal menyimpan (hanya guru)'))}
-  saveLocal();render();
+function typeNilai(i,v){D[[mp,jt,i].join('_')]=v;const n=Object.keys(D).length,b=$('#sv');if(b)b.textContent='💾 Simpan Nilai'+(n?' ('+n+' belum disimpan)':'')}
+function simpanNilai(){
+  const ks=Object.keys(D);if(!ks.length){toast('Belum ada nilai yang diubah');return}
+  ks.forEach(k=>{const [m,j,i]=k.split('_'),v=D[k];
+    if(v===''){delete V[k];if(db)db.collection('nilai').doc(k).delete().catch(()=>{})}
+    else{const r={mp:m,jt:j,i:+i,v:Math.max(0,Math.min(100,+v)),d:today};V[k]=r;if(db)db.collection('nilai').doc(k).set(r).catch(()=>toast('Gagal menyimpan (hanya guru)'))}});
+  D={};saveLocal();render();toast('Nilai tersimpan ✅')
 }
+function setPer(t){per={t,v:t=='bulanan'?today.slice(0,7):today};render()}
 function pick(i){
   const r=todayRec(i);
   if(r&&!canG){toast('Kamu sudah absen: '+r.status);return}
@@ -83,23 +87,39 @@ function pick(i){
 function choose(st){const i=sel;sel=null;setAbsen(i,st);toast('Absen tercatat: '+st+' ✅')}
 const ini=n=>n.split(' ').slice(0,2).map(w=>w[0]).join('');
 const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+const ymd=d=>d.toLocaleDateString('sv-SE');
+function rng(){const v=per.v||today;if(per.t=='harian')return[v,v,v];
+  if(per.t=='bulanan'){const[y,m]=v.split('-');return[y+'-'+m+'-01',y+'-'+m+'-31',v]}
+  const d=new Date(v+'T00:00:00');d.setDate(d.getDate()-(d.getDay()+6)%7);const a=ymd(d);d.setDate(d.getDate()+6);const b=ymd(d);return[a,b,a+'_sd_'+b]}
 async function unduh(nama,rows){
-  try{const d=window.claude&&await window.claude.use('downloads');if(!d){toast('Unduh belum tersedia di sini');return}
-    await d.save({filename:nama,data:'\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n')});toast('File siap ✅')}
-  catch(e){if(!e||e.code!='declined')toast('Gagal mengunduh')}
+  const csv='\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n');
+  try{const d=window.claude&&await window.claude.use('downloads');if(!d)throw{code:'na'};await d.save({filename:nama,data:csv});toast('File siap ✅')}
+  catch(e){if(e&&e.code=='declined')return;fb={n:nama,t:rows.map(r=>r.map(c=>String(c??'').replace(/[\t\r\n]+/g,' ')).join('\t')).join('\n')};render()}
 }
+function salin(){const t=$('#fbt');t.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}
+  if(!ok&&navigator.clipboard)navigator.clipboard.writeText(t.value).then(()=>toast('Tersalin ✅'),()=>toast('Tekan lama lalu salin'));else toast(ok?'Tersalin ✅':'Tekan lama lalu salin')}
 function unduhAbsen(){
-  const dates=[...new Set(Object.values(A).map(r=>r.date))].sort();
+  const[a,b,lb]=rng();
+  let dates=[...new Set(Object.values(A).map(r=>r.date))].filter(d=>d>=a&&d<=b).sort();
+  if(per.t=='harian'&&!dates.length)dates=[a];
   const rows=[['No','Nama',...dates,'Hadir','Izin','Sakit','Alpa','% Hadir']];
   N.forEach((n,i)=>{const c={Hadir:0,Izin:0,Sakit:0};const cells=dates.map(d=>{const r=A[d+'_'+i];if(r)c[r.status]++;return r?r.status:'Alpa'});
     rows.push([i+1,n,...cells,c.Hadir,c.Izin,c.Sakit,dates.length-c.Hadir-c.Izin-c.Sakit,dates.length?Math.round(c.Hadir/dates.length*100):0])});
-  unduh('rekap-absen-'+today+'.csv',rows);
+  unduh('absen-'+per.t+'-'+lb+'.csv',rows);
 }
 function unduhNilai(){
+  const[a,b,lb]=rng();
   const cols=[];MP.forEach(m=>JT.forEach(j=>cols.push([m[0],j,m[1]+' '+j])));
   const rows=[['No','Nama',...cols.map(c=>c[2]),'Rata-rata']];
-  N.forEach((n,i)=>{let s=0,k=0;const cells=cols.map(c=>{const r=V[[c[0],c[1],i].join('_')];if(r){s+=r.v;k++}return r?r.v:''});rows.push([i+1,n,...cells,k?(s/k).toFixed(1):''])});
-  unduh('rekap-nilai-'+today+'.csv',rows);
+  N.forEach((n,i)=>{let s=0,k=0;const cells=cols.map(c=>{const r=V[[c[0],c[1],i].join('_')];if(r&&(!r.d||(r.d>=a&&r.d<=b))){s+=r.v;k++;return r.v}return''});rows.push([i+1,n,...cells,k?(s/k).toFixed(1):''])});
+  unduh('nilai-'+per.t+'-'+lb+'.csv',rows);
+}
+function dlCard(){
+  const[a,b]=rng();
+  return `<div class="card"><h3>⬇️ Unduh rekap</h3><div style="display:flex;gap:6px;margin-bottom:10px">${[['harian','Harian'],['mingguan','Mingguan'],['bulanan','Bulanan']].map(x=>`<button class="seg ${per.t==x[0]?'on':''}" onclick="setPer('${x[0]}')">${x[1]}</button>`).join('')}</div>
+  <input type="${per.t=='bulanan'?'month':'date'}" value="${per.v}" onchange="per.v=this.value||today;render()" style="width:100%">
+  <p style="font-size:12px;color:var(--mu);margin:8px 0 0">Periode: ${per.t=='mingguan'?a+' s/d '+b:per.t=='bulanan'?per.v:a}${per.t=='mingguan'?' (Senin–Minggu)':''}</p>
+  <button class="big" style="background:var(--pr)" onclick="unduhAbsen()">⬇️ Unduh absen (CSV)</button><button class="big" style="background:var(--pr2)" onclick="unduhNilai()">⬇️ Unduh nilai (CSV)</button></div>`;
 }
 function absenView(){
   const c={Hadir:0,Izin:0,Sakit:0};N.forEach((_,i)=>{const r=todayRec(i);if(r)c[r.status]++});
@@ -116,14 +136,15 @@ function rekapView(){
   h+=`</div><div class="card"><h3>📊 Rekap (${dates.length} hari tercatat)</h3><div class="wrap"><table><tr><th>Nama</th><th>H</th><th>I</th><th>S</th><th>A</th><th>%</th></tr>`;
   N.forEach((n,i)=>{const c={Hadir:0,Izin:0,Sakit:0};dates.forEach(d=>{const r=A[d+'_'+i];if(r)c[r.status]++});const al=dates.length-c.Hadir-c.Izin-c.Sakit;const p=dates.length?Math.round(c.Hadir/dates.length*100):0;
     h+=`<tr><td>${n.split(' ').slice(0,2).join(' ')}</td><td>${c.Hadir}</td><td>${c.Izin}</td><td>${c.Sakit}</td><td style="color:var(--al)">${al}</td><td><b>${p}</b></td></tr>`});
-  return h+'</table></div><button class="big" style="background:var(--pr)" onclick="unduhAbsen()">⬇️ Unduh rekap absen (CSV)</button></div>';
+  return h+'</table></div></div>'+dlCard();
 }
 function nilaiView(){
   let h=`<div class="card"><div style="display:flex;gap:8px"><select style="flex:2" onchange="mp=this.value;render()">${MP.map(m=>`<option value="${m[0]}" ${m[0]==mp?'selected':''}>${m[1]}</option>`).join('')}</select><select style="flex:1" onchange="jt=this.value;render()">${JT.map(j=>`<option ${j==jt?'selected':''}>${j}</option>`).join('')}</select></div></div><div class="card">`;
   let sum=0,cnt=0;
-  N.forEach((n,i)=>{const r=V[[mp,jt,i].join('_')];if(r){sum+=r.v;cnt++}const col=r?(r.v>=75?'var(--ok)':r.v>=60?'var(--iz)':'var(--al)'):'var(--tx)';
-    h+=`<div class="row"><span class="n">${i+1}. ${n}</span><input type="number" min="0" max="100" inputmode="numeric" value="${r?r.v:''}" style="color:${col};font-weight:700" onchange="setNilai(${i},this.value)"></div>`});
-  return h+`</div><div class="card stats" style="grid-template-columns:1fr 1fr"><div><b>${cnt?(sum/cnt).toFixed(1):'-'}</b><span>Rata-rata kelas</span></div><div><b>${cnt}/${N.length}</b><span>Nilai terisi</span></div></div><button class="big" style="background:var(--pr)" onclick="unduhNilai()">⬇️ Unduh semua nilai (CSV)</button>`;
+  N.forEach((n,i)=>{const k=[mp,jt,i].join('_'),r=V[k];if(r){sum+=r.v;cnt++}const val=D[k]!==undefined?D[k]:(r?r.v:'');const col=r?(r.v>=75?'var(--ok)':r.v>=60?'var(--iz)':'var(--al)'):'var(--tx)';
+    h+=`<div class="row"><span class="n">${i+1}. ${n}</span><input type="number" min="0" max="100" inputmode="numeric" value="${val}" style="color:${col};font-weight:700" oninput="typeNilai(${i},this.value)"></div>`});
+  const nd=Object.keys(D).length;
+  return h+`</div><button id="sv" class="big" style="background:var(--ok)" onclick="simpanNilai()">💾 Simpan Nilai${nd?' ('+nd+' belum disimpan)':''}</button><div class="card stats" style="grid-template-columns:1fr 1fr;margin-top:12px"><div><b>${cnt?(sum/cnt).toFixed(1):'-'}</b><span>Rata-rata kelas</span></div><div><b>${cnt}/${N.length}</b><span>Nilai tersimpan</span></div></div>`;
 }
 function render(){
   const tabs=[['absen','✋','Absen']];if(canG)tabs.push(['rekap','📊','Rekap'],['nilai','📝','Nilai']);
@@ -133,11 +154,13 @@ function render(){
   $('#nav').innerHTML=tabs.map(t=>`<button class="${tab==t[0]?'on':''}" onclick="tab='${t[0]}';render()"><i>${t[1]}</i>${t[2]}</button>`).join('');
   $('#nav').style.display=tabs.length>1?'flex':'none';
   document.body.style.paddingBottom=tabs.length>1?'84px':'20px';
-  const old=document.querySelector('.sheet');if(old)old.remove();
+  document.querySelectorAll('.sheet').forEach(e=>e.remove());
   if(sel!=null){const s=document.createElement('div');s.className='sheet';s.onclick=e=>{if(e.target==s){sel=null;render()}};
     s.innerHTML=`<div><div style="text-align:center"><div class="av" style="margin:0 auto 8px;width:56px;height:56px;font-size:20px">${ini(N[sel])}</div><b>${N[sel]}</b><p style="color:var(--mu);font-size:13px;margin:4px 0 0">Hari ini kamu…</p></div>
     <button class="big" style="background:var(--ok)" onclick="choose('Hadir')">✅ Hadir</button><button class="big" style="background:var(--iz)" onclick="choose('Izin')">📩 Izin</button><button class="big" style="background:var(--sk)" onclick="choose('Sakit')">🤒 Sakit</button><button class="big ghost" onclick="sel=null;render()">Batal</button></div>`;
     document.body.appendChild(s)}
+  if(fb){const s=document.createElement('div');s.className='sheet';s.onclick=e=>{if(e.target==s){fb=null;render()}};
+    s.innerHTML=`<div><b>Unduhan langsung belum tersedia di perangkat ini</b><p style="color:var(--mu);font-size:13px">Salin data di bawah, lalu tempel ke Excel / Google Sheets (nama file: ${fb.n}).</p><textarea id="fbt" readonly style="width:100%;height:150px;font:12px monospace;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)">${fb.t}</textarea><button class="big" style="background:var(--pr)" onclick="salin()">📋 Salin data</button><button class="big ghost" onclick="fb=null;render()">Tutup</button></div>`;document.body.appendChild(s)}
 }
 render();init();
 </script>
