@@ -1,627 +1,145 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absensi dan Nilai Siswa</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Absensi & Nilai Siswa</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f5f9;
-  color: #243746;
-}
-
-header {
-  background: linear-gradient(120deg,#183b56,#2878b5);
-  color: white;
-  padding: 25px;
-  text-align: center;
-}
-
-header h1 {
-  margin: 0 0 8px;
-}
-
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 15px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  margin-bottom: 18px;
-  box-shadow: 0 3px 12px #00000010;
-}
-
-h2 {
-  color: #183b56;
-  margin-top: 0;
-}
-
-input, select, button {
-  padding: 11px;
-  border: 1px solid #ccd8e2;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-input, select {
-  width: 100%;
-  background: white;
-}
-
-label {
-  font-size: 13px;
-  font-weight: bold;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-  gap: 12px;
-}
-
-button {
-  background: #2878b5;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-button:hover {
-  opacity: .88;
-}
-
-.btn-secondary {
-  background: #e5edf4;
-  color: #183b56;
-}
-
-.btn-danger {
-  background: #b83b3b;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.table-wrap {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-  margin-top: 15px;
-}
-
-th, td {
-  padding: 11px;
-  border-bottom: 1px solid #e1e8ee;
-  text-align: left;
-}
-
-th {
-  background: #eaf2f8;
-  color: #183b56;
-}
-
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(110px,1fr));
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.stat {
-  background: #edf5fa;
-  border-radius: 10px;
-  text-align: center;
-  padding: 14px 5px;
-}
-
-.stat strong {
-  display: block;
-  font-size: 23px;
-  color: #2878b5;
-}
-
-.stat span {
-  font-size: 12px;
-}
-
-.info {
-  font-size: 13px;
-  color: #687d8d;
-  line-height: 1.6;
-}
-
-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
-  color: #718096;
-}
-
-@media(max-width:600px) {
-  header h1 {font-size: 21px;}
-  .card {padding: 14px;}
-}
+:root{--bg:#f4f6ff;--card:#fff;--tx:#1e2340;--mu:#6b7194;--pr:#5b5ff0;--pr2:#8a5cf6;--ok:#16a34a;--iz:#d97706;--sk:#2563eb;--al:#dc2626;--bd:#e4e7f5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142a;--card:#1b1f3d;--tx:#eef0ff;--mu:#9aa0c8;--bd:#2b305a}}
+:root[data-theme="dark"]{--bg:#11142a;--card:#1b1f3d;--tx:#eef0ff;--mu:#9aa0c8;--bd:#2b305a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:84px}
+header{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff;padding:22px 18px 54px;border-radius:0 0 28px 28px}
+header h1{margin:0;font-size:20px}header p{margin:4px 0 0;opacity:.85;font-size:13px}
+main{max-width:720px;margin:-38px auto 0;padding:0 14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(60,60,140,.08)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.stats b{display:block;font-size:22px}.stats span{font-size:11px;color:var(--mu)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sw{border:1px solid var(--bd);background:var(--card);border-radius:16px;padding:12px 10px;text-align:left;color:var(--tx);cursor:pointer;display:flex;gap:10px;align-items:center;font:inherit}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;background:linear-gradient(135deg,var(--pr),var(--pr2))}
+.sw small{display:block;color:var(--mu);font-size:11px;margin-top:2px}.sw span.n{font-size:12.5px;font-weight:600;line-height:1.25;word-break:break-word}
+.st-Hadir{border-color:var(--ok)}.st-Izin{border-color:var(--iz)}.st-Sakit{border-color:var(--sk)}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;color:#fff;display:inline-block}
+.t-Hadir{background:var(--ok)}.t-Izin{background:var(--iz)}.t-Sakit{background:var(--sk)}.t-Alpa{background:var(--al)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:none;border:0;color:var(--mu);font:inherit;font-size:12px;padding:6px;cursor:pointer}
+nav button.on{color:var(--pr);font-weight:700}nav i{display:block;font-style:normal;font-size:20px}
+.sheet{position:fixed;inset:0;background:rgba(10,10,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.sheet>div{background:var(--card);width:100%;max-width:520px;border-radius:24px 24px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px))}
+.big{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:16px;font-weight:700;color:#fff;margin-top:10px;cursor:pointer}
+.ghost{background:none;color:var(--mu);font-weight:500}
+select,input[type=number]{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bd)}.row:last-child{border:0}
+.row .n{font-size:13px;font-weight:600;flex:1}input[type=number]{width:78px;text-align:center}
+.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--bd)}td:first-child,th:first-child{text-align:left}
+.note{font-size:12px;color:var(--mu);background:var(--card);border:1px dashed var(--bd);border-radius:12px;padding:8px 12px;margin-bottom:12px}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#222;color:#fff;padding:9px 16px;border-radius:99px;font-size:13px;display:none;z-index:20}
+h3{margin:0 0 10px;font-size:15px}.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden;margin-top:12px}.bar div{height:100%;background:linear-gradient(90deg,var(--ok),#4ade80)}
 </style>
 </head>
-
 <body>
-
-<header>
-<h1>📋 APLIKASI ABSENSI SISWA</h1>
-<p>Absensi Harian, Input Nilai dan Rekap Bulanan</p>
-</header>
-
-<div class="container">
-
-<!-- IDENTITAS -->
-<section class="card">
-<h2>Identitas Sekolah</h2>
-
-<div class="form-grid">
-<div>
-<label>Nama Sekolah</label>
-<input id="school" value="SD NEGERI DUKOHKIDUL">
-</div>
-
-<div>
-<label>Kelas</label>
-<input id="className" value="V">
-</div>
-
-<div>
-<label>Tanggal Absensi</label>
-<input type="date" id="tanggal">
-</div>
-</div>
-</section>
-
-<!-- ABSENSI -->
-<section class="card">
-<h2>Daftar Hadir Siswa</h2>
-
-<p class="info">
-Pilih nama siswa pada dropdown, kemudian tentukan status kehadirannya.
-</p>
-
-<div class="form-grid">
-<div>
-<label>Pilih Nama Siswa</label>
-<select id="pilihSiswa"></select>
-</div>
-
-<div>
-<label>Status Kehadiran</label>
-<select id="status">
-<option value="">Pilih Status</option>
-<option value="H">Hadir</option>
-<option value="I">Izin</option>
-<option value="S">Sakit</option>
-<option value="A">Alpa</option>
-</select>
-</div>
-</div>
-
-<div class="actions">
-<button onclick="simpanAbsen()">Simpan Absensi</button>
-<button class="btn-secondary" onclick="tampilkanSemua()">Tampilkan Semua</button>
-</div>
-
-<div class="summary" id="summary"></div>
-
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>No</th>
-<th>Nama Siswa</th>
-<th>Status</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="tabelAbsen"></tbody>
-</table>
-</div>
-</section>
-
-<!-- INPUT NILAI -->
-<section class="card">
-<h2>Input Nilai Siswa</h2>
-
-<div class="form-grid">
-<div>
-<label>Tanggal</label>
-<input type="date" id="nilaiTanggal">
-</div>
-
-<div>
-<label>Nama Siswa</label>
-<select id="nilaiSiswa"></select>
-</div>
-
-<div>
-<label>Mata Pelajaran</label>
-<select id="mapel">
-<option>Bahasa Indonesia</option>
-<option>Matematika</option>
-<option>IPAS</option>
-<option>Pendidikan Pancasila</option>
-<option>Pendidikan Agama</option>
-<option>Bahasa Jawa</option>
-<option>Literasi Digital</option>
-<option>Muatan Lokal</option>
-</select>
-</div>
-
-<div>
-<label>Jenis Penilaian</label>
-<select id="jenisNilai">
-<option>Formatif</option>
-<option>Sumatif Harian</option>
-<option>STS</option>
-<option>SAS</option>
-<option>Tugas</option>
-<option>Praktik</option>
-</select>
-</div>
-
-<div>
-<label>Nilai (0-100)</label>
-<input type="number" id="nilai" min="0" max="100" placeholder="Masukkan nilai">
-</div>
-</div>
-
-<div class="actions">
-<button onclick="simpanNilai()">Simpan Nilai</button>
-</div>
-
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>No</th>
-<th>Tanggal</th>
-<th>Nama</th>
-<th>Mapel</th>
-<th>Jenis</th>
-<th>Nilai</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="tabelNilai"></tbody>
-</table>
-</div>
-</section>
-
-<!-- REKAP -->
-<section class="card">
-<h2>Rekap Bulanan</h2>
-
-<div class="form-grid">
-<div>
-<label>Pilih Bulan</label>
-<input type="month" id="bulan">
-</div>
-</div>
-
-<div class="actions">
-<button onclick="downloadAbsen()">⬇ Download Rekap Absensi</button>
-<button onclick="downloadNilai()">⬇ Download Rekap Nilai</button>
-<button class="btn-secondary" onclick="window.print()">Cetak Rekap</button>
-</div>
-
-<p class="info">
-File CSV dapat dibuka menggunakan Microsoft Excel.
-</p>
-</section>
-
-</div>
-
-<footer>
-Aplikasi Absensi dan Penilaian Siswa SD
-</footer>
-
+<header><h1>🏫 Absensi & Nilai Siswa</h1><p id="tgl"></p></header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div id="toast"></div>
 <script>
-
-// DAFTAR SISWA
-const siswa = [
-"AHMAD DIMAS ALFIANSYAH",
-"AISYAH AYUDIA INARA",
-"AMIRA BILQIS SURYANI",
-"ARDARA FREDILLA ULANI",
-"FEDRIN SATRIA RAJADA",
-"FITA INDRIYANI",
-"MOHAMAD APRILEO PRATAMA",
-"MUHAMMAD ONY FEBRIANTO",
-"NATASYA ARSYINTA DWI NUR SAQILA",
-"RAYA FRISKA AZZAHRA PUTRI",
-"RIZKI PUTRA PRATAMA",
-"ROBI'AH WIDYA ASANTI"
-];
-
-// DATABASE LOKAL
-let absensi = JSON.parse(
- localStorage.getItem("data_absensi") || "{}"
-);
-
-let nilaiData = JSON.parse(
- localStorage.getItem("data_nilai") || "[]"
-);
-
-// TANGGAL
-const sekarang = new Date();
-const tanggalHariIni =
- new Date(sekarang.getTime() -
- sekarang.getTimezoneOffset()*60000)
- .toISOString().slice(0,10);
-
-document.getElementById("tanggal").value = tanggalHariIni;
-document.getElementById("nilaiTanggal").value = tanggalHariIni;
-document.getElementById("bulan").value = tanggalHariIni.slice(0,7);
-
-// DROPDOWN NAMA
-function isiDropdown() {
- const opsi = siswa.map(nama =>
- `<option value="${nama}">${nama}</option>`
- ).join("");
-
- document.getElementById("pilihSiswa").innerHTML =
- `<option value="">Pilih Nama Siswa</option>` + opsi;
-
- document.getElementById("nilaiSiswa").innerHTML =
- `<option value="">Pilih Nama Siswa</option>` + opsi;
+const N=["AHMAD DIMAS ALFIANSYAH","AISYAH AYUDIA INARA","AMIRA BILQIS SURYANI","ARDARA FREDILLA ULANI","FEDRIN SATRIA RAJADA","FITA INDRIYANI","MOHAMAD APRILEO PRATAMA","MUHAMMAD ONY FEBRIANTO","NATASYA ARSYINTA DWI NUR SAQILA","RAYA FRISKA AZZAHRA PUTRI","RIZKI PUTRA PRATAMA","ROBI'AH WIDYA ASANTI"];
+const MP=[["MTK","Matematika"],["BIN","Bahasa Indonesia"],["BING","Bahasa Inggris"],["IPAS","IPAS"],["PPKN","PPKn"],["SBK","Seni Budaya"],["BJW","Bahasa Jawa"],["KDG","Koding"],["LDG","Literasi Digital"]];
+const JT=["Harian","UTS","UAS"];
+const $=s=>document.querySelector(s);
+const today=new Date().toLocaleDateString('sv-SE');
+let db=null,canG=false,mode='wait',tab='absen',sel=null,mp="MTK",jt="Harian",A={},V={};
+$('#tgl').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2200)}
+function saveLocal(){try{localStorage.setItem('absn',JSON.stringify({A,V}))}catch(e){}}
+async function init(){
+  try{const c=window.claude;if(c){db=await c.use('db');const u=await c.use('user');canG=u?u.canEdit():false}}catch(e){db=null}
+  if(db){mode='online';
+    db.collection('absen').onSnapshot(s=>{A={};s.docs.forEach(d=>A[d.id]=d.data());render()},()=>{});
+    db.collection('nilai').onSnapshot(s=>{V={};s.docs.forEach(d=>V[d.id]=d.data());render()},()=>{});
+  }else{mode='local';canG=true;try{const o=JSON.parse(localStorage.getItem('absn')||'{}');A=o.A||{};V=o.V||{}}catch(e){}}
+  render();
 }
-
-// SIMPAN ABSENSI
-function simpanAbsen() {
- const nama = document.getElementById("pilihSiswa").value;
- const status = document.getElementById("status").value;
- const tanggal = document.getElementById("tanggal").value;
-
- if(!nama || !status || !tanggal) {
-  alert("Silakan pilih nama, tanggal, dan status.");
-  return;
- }
-
- absensi[tanggal] ||= {};
- absensi[tanggal][nama] = status;
-
- localStorage.setItem("data_absensi",JSON.stringify(absensi));
-
- tampilkanSemua();
- document.getElementById("status").value = "";
-
- alert("Absensi berhasil disimpan.");
+function todayRec(i){return A[today+'_'+i]}
+function setAbsen(i,st){
+  const k=today+'_'+i;
+  if(st==null){delete A[k];if(db)db.collection('absen').doc(k).delete().catch(()=>toast('Gagal menyimpan'))}
+  else{const r={i,date:today,status:st,time:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})};A[k]=r;if(db)db.collection('absen').doc(k).set(r).catch(()=>toast('Gagal menyimpan'))}
+  saveLocal();render();
 }
-
-// TAMPILKAN ABSENSI
-function tampilkanSemua() {
- const tanggal = document.getElementById("tanggal").value;
- const data = absensi[tanggal] || {};
-
- document.getElementById("tabelAbsen").innerHTML =
- siswa.map((nama,i) => {
-  const status = data[nama] || "-";
-  return `
-  <tr>
-   <td>${i+1}</td>
-   <td>
-    <select onchange="ubahNama('${tanggal}', '${nama}', this.value)">
-     ${siswa.map(n =>
-      `<option value="${n}" ${n===nama?'selected':''}>${n}</option>`
-     ).join("")}
-    </select>
-   </td>
-   <td>
-    <select onchange="ubahStatus('${tanggal}','${nama}',this.value)">
-     <option value="" ${!data[nama]?'selected':''}>Belum Diisi</option>
-     <option value="H" ${status==='H'?'selected':''}>Hadir</option>
-     <option value="I" ${status==='I'?'selected':''}>Izin</option>
-     <option value="S" ${status==='S'?'selected':''}>Sakit</option>
-     <option value="A" ${status==='A'?'selected':''}>Alpa</option>
-    </select>
-   </td>
-   <td><button class="btn-danger" onclick="hapusAbsen('${tanggal}','${nama}')">Hapus</button></td>
-  </tr>`;
- }).join("");
-
- hitungAbsen(data);
+function setNilai(i,val){
+  const k=[mp,jt,i].join('_');
+  if(val===''){delete V[k];if(db)db.collection('nilai').doc(k).delete().catch(()=>{})}
+  else{const r={mp,jt,i,v:Math.max(0,Math.min(100,+val))};V[k]=r;if(db)db.collection('nilai').doc(k).set(r).catch(()=>toast('Gagal menyimpan (hanya guru)'))}
+  saveLocal();render();
 }
-
-function ubahNama(tanggal,namaBaru,namaLama) {
- // Daftar siswa utama tetap menjadi acuan.
- // Pemilihan nama tersedia melalui dropdown.
- tampilkanSemua();
+function pick(i){
+  const r=todayRec(i);
+  if(r&&!canG){toast('Kamu sudah absen: '+r.status);return}
+  sel=i;render();
 }
-
-function ubahStatus(tanggal,nama,status) {
- absensi[tanggal] ||= {};
- if(status) absensi[tanggal][nama]=status;
- else delete absensi[tanggal][nama];
-
- localStorage.setItem("data_absensi",JSON.stringify(absensi));
- tampilkanSemua();
+function choose(st){const i=sel;sel=null;setAbsen(i,st);toast('Absen tercatat: '+st+' ✅')}
+const ini=n=>n.split(' ').slice(0,2).map(w=>w[0]).join('');
+const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+async function unduh(nama,rows){
+  try{const d=window.claude&&await window.claude.use('downloads');if(!d){toast('Unduh belum tersedia di sini');return}
+    await d.save({filename:nama,data:'\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n')});toast('File siap ✅')}
+  catch(e){if(!e||e.code!='declined')toast('Gagal mengunduh')}
 }
-
-function hapusAbsen(tanggal,nama) {
- delete absensi[tanggal][nama];
- localStorage.setItem("data_absensi",JSON.stringify(absensi));
- tampilkanSemua();
+function unduhAbsen(){
+  const dates=[...new Set(Object.values(A).map(r=>r.date))].sort();
+  const rows=[['No','Nama',...dates,'Hadir','Izin','Sakit','Alpa','% Hadir']];
+  N.forEach((n,i)=>{const c={Hadir:0,Izin:0,Sakit:0};const cells=dates.map(d=>{const r=A[d+'_'+i];if(r)c[r.status]++;return r?r.status:'Alpa'});
+    rows.push([i+1,n,...cells,c.Hadir,c.Izin,c.Sakit,dates.length-c.Hadir-c.Izin-c.Sakit,dates.length?Math.round(c.Hadir/dates.length*100):0])});
+  unduh('rekap-absen-'+today+'.csv',rows);
 }
-
-function hitungAbsen(data) {
- const jumlah = {H:0,I:0,S:0,A:0};
- Object.values(data).forEach(s=>{
-  if(jumlah[s]!==undefined) jumlah[s]++;
- });
-
- document.getElementById("summary").innerHTML =
- `
- <div class="stat"><strong>${siswa.length}</strong><span>Jumlah Siswa</span></div>
- <div class="stat"><strong>${jumlah.H}</strong><span>Hadir</span></div>
- <div class="stat"><strong>${jumlah.I}</strong><span>Izin</span></div>
- <div class="stat"><strong>${jumlah.S}</strong><span>Sakit</span></div>
- <div class="stat"><strong>${jumlah.A}</strong><span>Alpa</span></div>
- `;
+function unduhNilai(){
+  const cols=[];MP.forEach(m=>JT.forEach(j=>cols.push([m[0],j,m[1]+' '+j])));
+  const rows=[['No','Nama',...cols.map(c=>c[2]),'Rata-rata']];
+  N.forEach((n,i)=>{let s=0,k=0;const cells=cols.map(c=>{const r=V[[c[0],c[1],i].join('_')];if(r){s+=r.v;k++}return r?r.v:''});rows.push([i+1,n,...cells,k?(s/k).toFixed(1):''])});
+  unduh('rekap-nilai-'+today+'.csv',rows);
 }
-
-// SIMPAN NILAI
-function simpanNilai() {
- const tanggal = document.getElementById("nilaiTanggal").value;
- const nama = document.getElementById("nilaiSiswa").value;
- const mapel = document.getElementById("mapel").value;
- const jenis = document.getElementById("jenisNilai").value;
- const nilai = document.getElementById("nilai").value;
-
- if(!tanggal || !nama || nilai==="" ||
- Number(nilai)<0 || Number(nilai)>100) {
-  alert("Lengkapi data nilai dengan benar.");
-  return;
- }
-
- nilaiData.push({
-  tanggal,nama,mapel,jenis,nilai:Number(nilai)
- });
-
- localStorage.setItem("data_nilai",JSON.stringify(nilaiData));
-
- document.getElementById("nilai").value="";
- tampilkanNilai();
- alert("Nilai berhasil disimpan.");
+function absenView(){
+  const c={Hadir:0,Izin:0,Sakit:0};N.forEach((_,i)=>{const r=todayRec(i);if(r)c[r.status]++});
+  const done=c.Hadir+c.Izin+c.Sakit;
+  let h=`<div class="card"><div class="stats"><div><b style="color:var(--ok)">${c.Hadir}</b><span>Hadir</span></div><div><b style="color:var(--iz)">${c.Izin}</b><span>Izin</span></div><div><b style="color:var(--sk)">${c.Sakit}</b><span>Sakit</span></div><div><b>${N.length-done}</b><span>Belum</span></div></div><div class="bar"><div style="width:${done/N.length*100}%"></div></div></div>
+  <h3 style="margin:14px 4px 8px">👋 Ketuk namamu untuk absen</h3><div class="grid">`;
+  N.forEach((n,i)=>{const r=todayRec(i);h+=`<button class="sw ${r?'st-'+r.status:''}" onclick="pick(${i})"><div class="av">${ini(n)}</div><div><span class="n">${n}</span><small>${r?`<span class="tag t-${r.status}">${r.status}</span> ${r.time}`:'Belum absen'}</small></div></button>`});
+  return h+'</div>';
 }
-
-// TAMPILKAN NILAI
-function tampilkanNilai() {
- const bulan = document.getElementById("bulan").value;
-
- const data = nilaiData.filter(n =>
-  n.tanggal.startsWith(bulan)
- );
-
- document.getElementById("tabelNilai").innerHTML =
- data.map((n,i)=>`
- <tr>
- <td>${i+1}</td>
- <td>${n.tanggal}</td>
- <td>${n.nama}</td>
- <td>${n.mapel}</td>
- <td>${n.jenis}</td>
- <td>${n.nilai}</td>
- <td><button class="btn-danger" onclick="hapusNilai(${nilaiData.indexOf(n)})">Hapus</button></td>
- </tr>
- `).join("");
+function rekapView(){
+  const dates=[...new Set(Object.values(A).map(r=>r.date))];
+  let h=`<div class="card"><h3>📋 Absen hari ini</h3>`;
+  N.forEach((n,i)=>{const r=todayRec(i);h+=`<div class="row"><span class="n">${n}</span><select onchange="setAbsen(${i},this.value||null)"><option value="">Belum</option>${['Hadir','Izin','Sakit'].map(s=>`<option ${r&&r.status==s?'selected':''}>${s}</option>`).join('')}</select></div>`});
+  h+=`</div><div class="card"><h3>📊 Rekap (${dates.length} hari tercatat)</h3><div class="wrap"><table><tr><th>Nama</th><th>H</th><th>I</th><th>S</th><th>A</th><th>%</th></tr>`;
+  N.forEach((n,i)=>{const c={Hadir:0,Izin:0,Sakit:0};dates.forEach(d=>{const r=A[d+'_'+i];if(r)c[r.status]++});const al=dates.length-c.Hadir-c.Izin-c.Sakit;const p=dates.length?Math.round(c.Hadir/dates.length*100):0;
+    h+=`<tr><td>${n.split(' ').slice(0,2).join(' ')}</td><td>${c.Hadir}</td><td>${c.Izin}</td><td>${c.Sakit}</td><td style="color:var(--al)">${al}</td><td><b>${p}</b></td></tr>`});
+  return h+'</table></div><button class="big" style="background:var(--pr)" onclick="unduhAbsen()">⬇️ Unduh rekap absen (CSV)</button></div>';
 }
-
-function hapusNilai(index) {
- if(confirm("Hapus data nilai ini?")) {
-  nilaiData.splice(index,1);
-  localStorage.setItem("data_nilai",JSON.stringify(nilaiData));
-  tampilkanNilai();
- }
+function nilaiView(){
+  let h=`<div class="card"><div style="display:flex;gap:8px"><select style="flex:2" onchange="mp=this.value;render()">${MP.map(m=>`<option value="${m[0]}" ${m[0]==mp?'selected':''}>${m[1]}</option>`).join('')}</select><select style="flex:1" onchange="jt=this.value;render()">${JT.map(j=>`<option ${j==jt?'selected':''}>${j}</option>`).join('')}</select></div></div><div class="card">`;
+  let sum=0,cnt=0;
+  N.forEach((n,i)=>{const r=V[[mp,jt,i].join('_')];if(r){sum+=r.v;cnt++}const col=r?(r.v>=75?'var(--ok)':r.v>=60?'var(--iz)':'var(--al)'):'var(--tx)';
+    h+=`<div class="row"><span class="n">${i+1}. ${n}</span><input type="number" min="0" max="100" inputmode="numeric" value="${r?r.v:''}" style="color:${col};font-weight:700" onchange="setNilai(${i},this.value)"></div>`});
+  return h+`</div><div class="card stats" style="grid-template-columns:1fr 1fr"><div><b>${cnt?(sum/cnt).toFixed(1):'-'}</b><span>Rata-rata kelas</span></div><div><b>${cnt}/${N.length}</b><span>Nilai terisi</span></div></div><button class="big" style="background:var(--pr)" onclick="unduhNilai()">⬇️ Unduh semua nilai (CSV)</button>`;
 }
-
-// DOWNLOAD CSV
-function unduhCSV(namaFile,baris) {
- const isi = baris.map(row =>
-  row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')
- ).join('\r\n');
-
- const blob = new Blob(["\ufeff"+isi],{
-  type:"text/csv;charset=utf-8;"
- });
-
- const url = URL.createObjectURL(blob);
- const a = document.createElement("a");
-
- a.href=url;
- a.download=namaFile;
- a.click();
-
- URL.revokeObjectURL(url);
+function render(){
+  const tabs=[['absen','✋','Absen']];if(canG)tabs.push(['rekap','📊','Rekap'],['nilai','📝','Nilai']);
+  if(!canG&&tab!='absen')tab='absen';
+  const note=mode=='wait'?'⏳ Menyambungkan…':mode=='local'?'ℹ️ Mode lokal: data hanya tersimpan di perangkat ini.':'';
+  $('#app').innerHTML=(note?`<div class="note">${note}</div>`:'')+(tab=='absen'?absenView():tab=='rekap'?rekapView():nilaiView());
+  $('#nav').innerHTML=tabs.map(t=>`<button class="${tab==t[0]?'on':''}" onclick="tab='${t[0]}';render()"><i>${t[1]}</i>${t[2]}</button>`).join('');
+  $('#nav').style.display=tabs.length>1?'flex':'none';
+  document.body.style.paddingBottom=tabs.length>1?'84px':'20px';
+  const old=document.querySelector('.sheet');if(old)old.remove();
+  if(sel!=null){const s=document.createElement('div');s.className='sheet';s.onclick=e=>{if(e.target==s){sel=null;render()}};
+    s.innerHTML=`<div><div style="text-align:center"><div class="av" style="margin:0 auto 8px;width:56px;height:56px;font-size:20px">${ini(N[sel])}</div><b>${N[sel]}</b><p style="color:var(--mu);font-size:13px;margin:4px 0 0">Hari ini kamu…</p></div>
+    <button class="big" style="background:var(--ok)" onclick="choose('Hadir')">✅ Hadir</button><button class="big" style="background:var(--iz)" onclick="choose('Izin')">📩 Izin</button><button class="big" style="background:var(--sk)" onclick="choose('Sakit')">🤒 Sakit</button><button class="big ghost" onclick="sel=null;render()">Batal</button></div>`;
+    document.body.appendChild(s)}
 }
-
-// REKAP ABSENSI
-function downloadAbsen() {
- const bulan = document.getElementById("bulan").value;
-
- const tanggal = Object.keys(absensi)
- .filter(t=>t.startsWith(bulan)).sort();
-
- const baris = [
-  ["Nama Sekolah",document.getElementById("school").value],
-  ["Kelas",document.getElementById("className").value],
-  ["Bulan",bulan],
-  [],
-  ["No","Nama Siswa","Hadir","Izin","Sakit","Alpa",...tanggal]
- ];
-
- siswa.forEach((nama,i)=>{
-  const hitung={H:0,I:0,S:0,A:0};
-
-  tanggal.forEach(t=>{
-   const s=absensi[t][nama];
-   if(hitung[s]!==undefined) hitung[s]++;
-  });
-
-  baris.push([
-   i+1,nama,hitung.H,hitung.I,hitung.S,hitung.A,
-   ...tanggal.map(t=>absensi[t][nama]||"-")
-  ]);
- });
-
- unduhCSV("Rekap_Absensi_"+bulan+".csv",baris);
-}
-
-// REKAP NILAI
-function downloadNilai() {
- const bulan = document.getElementById("bulan").value;
-
- const data = nilaiData.filter(n=>n.tanggal.startsWith(bulan));
-
- const baris=[
-  ["Nama Sekolah",document.getElementById("school").value],
-  ["Kelas",document.getElementById("className").value],
-  ["Bulan",bulan],
-  [],
-  ["No","Tanggal","Nama Siswa","Mata Pelajaran","Jenis Penilaian","Nilai"]
- ];
-
- data.forEach((n,i)=>{
-  baris.push([i+1,n.tanggal,n.nama,n.mapel,n.jenis,n.nilai]);
- });
-
- unduhCSV("Rekap_Nilai_"+bulan+".csv",baris);
-}
-
-document.getElementById("tanggal").onchange=tampilkanSemua;
-document.getElementById("bulan").onchange=tampilkanNilai;
-
-isiDropdown();
-tampilkanSemua();
-tampilkanNilai();
-
+render();init();
 </script>
 </body>
 </html>
